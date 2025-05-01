@@ -10,16 +10,29 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: Maven@3
+- task: Maven@4
   inputs:
+    azureSubscription: 'Pay-As-You-Go(1)(573a808f-852a-4d92-bd61-b8f21e16aeaf)'
     mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+    javaHomeOption: 'JDKVersion'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: true
+    sqMavenPluginVersionChoice: 'latest'
+    
+# - task: Maven@3
+#   inputs:
+#     mavenPomFile: 'pom.xml'
+#     mavenOptions: '-Xmx3072m'
+#     javaHomeOption: 'JDKVersion'
+#     jdkVersionOption: '1.11'
+#     jdkArchitectureOption: 'x64'
+#     publishJUnitResults: true
+#     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+#     goals: 'package'
 
 - task: PublishBuildArtifacts@1
   inputs:
