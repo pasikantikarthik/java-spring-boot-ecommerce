@@ -38,3 +38,9 @@ steps:
     PathtoPublish: '$(System.DefaultWorkingDirectory)/target'
     ArtifactName: 'drop'
     publishLocation: 'Container'
+
+- script: |
+    echo "Listing files in target folder:"
+    ls -R $(System.DefaultWorkingDirectory)/target
+  displayName: 'List target directory contents'
+
