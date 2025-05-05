@@ -66,3 +66,66 @@ steps:
       pwd
       echo "🔨 Building Docker image..."
       docker build -t $(imageName):$(imageTag) .
+
+# Step 3: Login to ACR, tag, and push image
+- task: AzureCLI@2
+  displayName: '📦 Push to ACR'
+  inputs:
+    azureSubscription: 'Pay-As-You-Go(1)(573a808f-852a-4d92-bd61-b8f21e16aeaf)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "🔐 Logging into ACR..."
+      az acr login --name $(acrName)
+
+      echo "🏷️ Tagging image..."
+      docker tag $(imageName):$(imageTag) $(acrLoginServer)/$(imageName):$(imageTag)
+
+      echo "📤 Pushing image to ACR..."
+      docker push $(acrLoginServer)/$(imageName):$(imageTag)
+
+
+# Step 4: Connect to AKS Cluster
+- task: AzureCLI@2
+  displayName: '🔗 Connect to AKS'
+  inputs:
+    azureSubscription: 'Pay-As-You-Go(1)(573a808f-852a-4d92-bd61-b8f21e16aeaf)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "📡 Connecting to AKS..."
+      az aks get-credentials --resource-group $(resourceGroup) --name $(aksClusterName) --overwrite-existing
+
+# Step 5: Create imagePullSecret
+- task: AzureCLI@2
+  displayName: '🔐 Create ACR imagePullSecret (acr-secret)'
+  inputs:
+    azureSubscription: 'Pay-As-You-Go(1)(573a808f-852a-4d92-bd61-b8f21e16aeaf)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "🔐 Creating image pull secret..."
+      kubectl create secret docker-registry acr-secret \
+        --docker-server=$(acrLoginServer) \
+        --docker-username=$(acrName) \
+        --docker-password=$(az acr credential show -n $(acrName) --query "passwords[0].value" -o tsv) \
+        --namespace default --dry-run=client -o yaml | kubectl apply -f -
+
+# Step 6: Apply Deployment and Service YAMLs
+- task: Bash@3
+  displayName: '📜 Apply Deployment & Service YAMLs (no image)'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "📦 Applying base deployment & service YAMLs..."
+      kubectl apply -f manifest-files/deployment.yaml
+      kubectl apply -f manifest-files/service.yaml
+
+# Step 7: Set Image Dynamically
+- task: Bash@3
+  displayName: '🚀 Set Image Dynamically (kubectl set image)'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "🔁 Updating image to: $(acrLoginServer)/$(imageName):$(imageTag)"
+      kubectl set image deployment/$(deploymentName) $(deploymentName)=$(acrLoginServer)/$(imageName):$(imageTag)
