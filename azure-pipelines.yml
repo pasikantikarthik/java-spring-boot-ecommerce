@@ -14,7 +14,7 @@ variables:
   imageName: javaapp
   imageTag: $(Build.BuildId)  # Dynamic tagging for versioning
   resourceGroup: dev1-resource
-  aksClusterName: devaks01
+  aksClusterName: dev-aks1
   deploymentName: my-java-app  # Matches the name in your deployment.yaml
 
 steps:
