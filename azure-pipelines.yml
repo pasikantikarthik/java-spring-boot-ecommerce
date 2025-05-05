@@ -13,7 +13,7 @@ variables:
   acrLoginServer: devacr1registrydev.azurecr.io
   imageName: javaapp
   imageTag: $(Build.BuildId)  # Dynamic tagging for versioning
-  resourceGroup: dev-rg
+  resourceGroup: dev1-resource
   aksClusterName: devaks01
   deploymentName: my-java-app  # Matches the name in your deployment.yaml
 
