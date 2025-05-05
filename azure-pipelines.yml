@@ -120,8 +120,8 @@ steps:
     targetType: 'inline'
     script: |
       echo "📦 Applying base deployment & service YAMLs..."
-      kubectl apply -f manifest-files/deployment.yaml
-      kubectl apply -f manifest-files/service.yaml
+      kubectl apply -f deployment.yaml
+      kubectl apply -f service.yaml
 
 # Step 7: Set Image Dynamically
 - task: Bash@3
