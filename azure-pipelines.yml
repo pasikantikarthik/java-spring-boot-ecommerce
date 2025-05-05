@@ -86,7 +86,14 @@ steps:
       echo "📤 Pushing image to ACR..."
       docker push $(acrLoginServer)/$(imageName):$(imageTag)
 
-
+- task: Bash@3
+  displayName: "📝 Replace image tag in manifest"
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "Replacing placeholder with actual Build ID..."
+      sed "s|\$(Build.BuildId)|${BUILD_BUILDID}|g" deployment.yaml > deployment.yaml
+      
 # Step 4: Connect to AKS Cluster
 - task: AzureCLI@2
   displayName: '🔗 Connect to AKS'
