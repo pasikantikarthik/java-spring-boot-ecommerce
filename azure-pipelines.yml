@@ -75,6 +75,8 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
+      echo "$(az acr credential show --name $(acrName) --query "username" -o tsv)"
+      echo "$(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv)" | docker login $(acrLoginServer) --username $(acrName) --password-stdin
       echo "🔐 Logging into ACR..."
       az acr login --name $(acrName)
 
