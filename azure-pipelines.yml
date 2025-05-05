@@ -8,6 +8,15 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
+  
+variables:
+  acrName: devacr01
+  acrLoginServer: devacr01.azurecr.io
+  imageName: javaapp
+  imageTag: $(Build.BuildId)  # Dynamic tagging for versioning
+  resourceGroup: dev-rg
+  aksClusterName: devaks01
+  deploymentName: my-java-app  # Matches the name in your deployment.yaml
 
 steps:
 - task: Maven@4
@@ -44,3 +53,17 @@ steps:
     ls -R $(System.DefaultWorkingDirectory)/target
   displayName: 'List target directory contents'
 
+# Step 1: Starting the pipeline
+- script: echo "🔧 Starting the Build & Deploy Pipeline"
+  displayName: '🏁 Start'
+
+# Step 2: Build Docker image
+- task: Bash@3
+  displayName: '🐳 Build Docker Image'
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "📁 Current Directory:"
+      pwd
+      echo "🔨 Building Docker image..."
+      docker build -t $(imageName):$(imageTag) .
